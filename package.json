@@ -1,0 +1,38 @@
+{
+  "name": "pretris",
+  "version": "1.0.0",
+  "description": "It's a tetris",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack-dev-server --mode development --open",
+    "dist-dev": "webpack --mode development",
+    "dist-prod": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juhofriman/pretris.git"
+  },
+  "keywords": [
+    "Tetris"
+  ],
+  "author": "Juho Friman <juho.t.friman@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/juhofriman/pretris/issues"
+  },
+  "homepage": "https://github.com/juhofriman/pretris#readme",
+  "dependencies": {
+    "ramda": "^0.25.0"
+  },
+  "devDependencies": {
+    "html-webpack-plugin": "^3.2.0",
+    "install": "^0.11.0",
+    "npm": "^6.1.0",
+    "ts-loader": "^4.3.0",
+    "typescript": "^2.8.3",
+    "webpack": "^4.9.1",
+    "webpack-cli": "^2.1.4",
+    "webpack-dev-server": "^3.1.4"
+  }
+}
