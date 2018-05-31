@@ -1,3 +1,6 @@
+import {Block, getBlock} from './blocks';
+import {Color, Palette} from './palette'
+
 const WIDTH = 15;
 const HEIGHT = 20;
 const EMPTY = 'E';
@@ -15,110 +18,6 @@ enum KeyboardSignal {
 enum BlockStatus {
   OCCUPIED = 'occupied',
   FREE  = 'free'
-}
-
-interface Color {
-  readonly hex: string;
-}
-
-class Palette {
-  static freeColor: Color = {hex: '#ddd'}
-  static colors: Color[] = [
-    {hex: "#479030"},
-    {hex: "#1B5209"},
-    {hex: "#205211"},
-    {hex: "#7ACE60"},
-    {hex: "#89CE73"},
-    {hex: "#226765"},
-    {hex: "#063B39"},
-    {hex: "#0C3B39"},
-    {hex: "#459491"},
-    {hex: "#529491"},
-    {hex: "#8AA236"},
-    {hex: "#4A5D0A"},
-    {hex: "#4C5D13"},
-    {hex: "#CCE86C"},
-    {hex: "#D1E882"}]
-
-  static random(): Color {
-    return this.colors[Math.floor(Math.random() * this.colors.length)]
-  }
-}
-
-interface Block {
-  init(board: GameBoard): void
-  drop(board: GameBoard): void
-  hardDrop(board: GameBoard): void;
-  left(board: GameBoard): void
-  right(board: GameBoard): void
-  canDrop(board: GameBoard): boolean
-  canMoveLeft(board: GameBoard): boolean
-  canMoveRight(board: GameBoard): boolean
-}
-
-class OneBlock implements Block {
-
-  x: number;
-  y: number;
-  color: Color;
-
-  constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-    this.color = Palette.random();
-  }
-
-  init(board: GameBoard): void {
-    board.setOccupied(this.x, this.y, this.color);
-  }
-
-  drop(board: GameBoard): void {
-    if(this.canDrop(board)) {
-      board.setFree(this.x, this.y);
-      this.x++;
-      board.setOccupied(this.x, this.y, this.color);
-    } else {
-      board.signalFreeze();
-    }
-  }
-
-  hardDrop(board: GameBoard): void {
-    var c = this.x;
-    do {
-      c++;
-    } while(board.isFree(c, this.y))
-    board.setFree(this.x, this.y);
-    board.setOccupied(c-1, this.y, this.color);
-    board.signalFreeze();
-  }
-
-  left(board: GameBoard): void {
-    if(this.canMoveLeft(board)) {
-      board.setFree(this.x, this.y);
-      this.y--;
-      board.setOccupied(this.x, this.y, this.color);
-    }
-  }
-
-  right(board: GameBoard): void {
-    if(this.canMoveRight(board)) {
-      board.setFree(this.x, this.y);
-      this.y++;
-      board.setOccupied(this.x, this.y, this.color);
-    }
-  }
-
-  canDrop(board: GameBoard): boolean {
-    return board.isFree(this.x + 1, this.y);
-  }
-
-  canMoveLeft(board: GameBoard): boolean {
-    return board.isFree(this.x, this.y - 1);
-  }
-
-  canMoveRight(board: GameBoard): boolean {
-    return board.isFree(this.x, this.y + 1);
-  }
 }
 
 class BoardNode {
@@ -149,7 +48,7 @@ class BoardNode {
   }
 }
 
-class GameBoard {
+export class GameBoard {
 
   control: Block;
 
@@ -179,8 +78,7 @@ class GameBoard {
     }
 
     container.appendChild(table);
-    this.control = new OneBlock(0, 5);
-    this.control.init(this);
+    this.signalFreeze();
   }
 
   setOccupied(x: number, y: number, color: Color): void {
@@ -202,7 +100,7 @@ class GameBoard {
   }
 
   signalFreeze(): void {
-    this.control = new OneBlock(0, 5);
+    this.control = getBlock();
     this.control.init(this);
   }
 
