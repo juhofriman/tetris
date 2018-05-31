@@ -1,8 +1,127 @@
-const WIDTH = 20;
-const HEIGHT = 40;
+const WIDTH = 15;
+const HEIGHT = 20;
 const EMPTY = 'E';
 
-class Block {
+enum KeyboardSignal {
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+    FLIP,
+    DROP,
+    HARDDROP
+}
+
+enum BlockStatus {
+  OCCUPIED = 'occupied',
+  FREE  = 'free'
+}
+
+interface Color {
+  readonly hex: string;
+}
+
+class Palette {
+  static freeColor: Color = {hex: '#ddd'}
+  static colors: Color[] = [
+    {hex: "#479030"},
+    {hex: "#1B5209"},
+    {hex: "#205211"},
+    {hex: "#7ACE60"},
+    {hex: "#89CE73"},
+    {hex: "#226765"},
+    {hex: "#063B39"},
+    {hex: "#0C3B39"},
+    {hex: "#459491"},
+    {hex: "#529491"},
+    {hex: "#8AA236"},
+    {hex: "#4A5D0A"},
+    {hex: "#4C5D13"},
+    {hex: "#CCE86C"},
+    {hex: "#D1E882"}]
+
+  static random(): Color {
+    return this.colors[Math.floor(Math.random() * this.colors.length)]
+  }
+}
+
+interface Block {
+  init(board: GameBoard): void
+  drop(board: GameBoard): void
+  hardDrop(board: GameBoard): void;
+  left(board: GameBoard): void
+  right(board: GameBoard): void
+  canDrop(board: GameBoard): boolean
+  canMoveLeft(board: GameBoard): boolean
+  canMoveRight(board: GameBoard): boolean
+}
+
+class OneBlock implements Block {
+
+  x: number;
+  y: number;
+  color: Color;
+
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+    this.color = Palette.random();
+  }
+
+  init(board: GameBoard): void {
+    board.setOccupied(this.x, this.y, this.color);
+  }
+
+  drop(board: GameBoard): void {
+    if(this.canDrop(board)) {
+      board.setFree(this.x, this.y);
+      this.x++;
+      board.setOccupied(this.x, this.y, this.color);
+    } else {
+      board.signalFreeze();
+    }
+  }
+
+  hardDrop(board: GameBoard): void {
+    var c = this.x;
+    do {
+      c++;
+    } while(board.isFree(c, this.y))
+    board.setFree(this.x, this.y);
+    board.setOccupied(c-1, this.y, this.color);
+    board.signalFreeze();
+  }
+
+  left(board: GameBoard): void {
+    if(this.canMoveLeft(board)) {
+      board.setFree(this.x, this.y);
+      this.y--;
+      board.setOccupied(this.x, this.y, this.color);
+    }
+  }
+
+  right(board: GameBoard): void {
+    if(this.canMoveRight(board)) {
+      board.setFree(this.x, this.y);
+      this.y++;
+      board.setOccupied(this.x, this.y, this.color);
+    }
+  }
+
+  canDrop(board: GameBoard): boolean {
+    return board.isFree(this.x + 1, this.y);
+  }
+
+  canMoveLeft(board: GameBoard): boolean {
+    return board.isFree(this.x, this.y - 1);
+  }
+
+  canMoveRight(board: GameBoard): boolean {
+    return board.isFree(this.x, this.y + 1);
+  }
+}
+
+class BoardNode {
 
   x: number;
   y: number;
@@ -13,20 +132,28 @@ class Block {
     this.y = y;
     this.domNode = domNode;
     this.domNode.id = this.identifier();
+    this.domNode.style.backgroundColor = Palette.freeColor.hex;
   }
 
   identifier(): string {
     return this.x + '-' + this.y;
   }
 
-  setClass(clazz: string): void {
-    this.domNode.className = clazz;
+  setStatus(status: BlockStatus, color: Color): void {
+    this.domNode.className = status.toString();
+    this.domNode.style.backgroundColor = color.hex;
+  }
+
+  status(): string {
+    return this.domNode.className;
   }
 }
 
 class GameBoard {
 
-  board: Block[][] = new Array<Block[]>();
+  control: Block;
+
+  board: BoardNode[][] = new Array<BoardNode[]>();
 
   /**
    * Constructs game board and hooks it to the DOM
@@ -39,12 +166,12 @@ class GameBoard {
     for(var i:number = 0; i < HEIGHT; i++) {
 
       var rowElement = document.createElement('tr');
-      this.board[i] = new Array<Block>();
+      this.board[i] = new Array<BoardNode>();
       for(var c:number = 0; c < WIDTH; c++) {
         var block = this.board[i][c];
         var node = document.createElement('td');
 
-        this.board[i][c] = new Block(node, i, c);
+        this.board[i][c] = new BoardNode(node, i, c);
 
         rowElement.appendChild(node);
       }
@@ -52,184 +179,72 @@ class GameBoard {
     }
 
     container.appendChild(table);
+    this.control = new OneBlock(0, 5);
+    this.control.init(this);
   }
 
-  handleChange(x: number, y: number, message: string): void {
-    this.board[x][y].setClass(message)
+  setOccupied(x: number, y: number, color: Color): void {
+    this.board[x][y].setStatus(BlockStatus.OCCUPIED, color);
   }
 
+  setFree(x: number, y: number): void {
+    this.board[x][y].setStatus(BlockStatus.FREE, Palette.freeColor);
+  }
+
+  isFree(x: number, y: number): boolean {
+    if(y < 0 || y >= WIDTH) {
+      return false;
+    }
+    if(x >= HEIGHT) {
+      return false;
+    }
+    return this.board[x][y].status() !== 'occupied';
+  }
+
+  signalFreeze(): void {
+    this.control = new OneBlock(0, 5);
+    this.control.init(this);
+  }
+
+  run(): void {
+    this.control.drop(this);
+  }
+
+  emit(signal: KeyboardSignal): void {
+    switch(signal) {
+      case KeyboardSignal.LEFT: this.control.left(this); break;
+      case KeyboardSignal.RIGHT: this.control.right(this); break;
+      case KeyboardSignal.HARDDROP: this.control.hardDrop(this); break;
+      case KeyboardSignal.DROP: this.control.drop(this); break;
+    }
+  }
 }
 
 const game = new GameBoard('game');
 
-class OneBlock {
-
-  x: number;
-  y: number;
-
-  constructor( x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
-
-  drop(board: GameBoard): void {
-    board.handleChange(this.x, this.y, '');
-    this.x++;
-    board.handleChange(this.x, this.y, 'occupied');
-  }
-
-  left(board: GameBoard): void {
-    board.handleChange(this.x, this.y, '');
-    this.y--;
-    board.handleChange(this.x, this.y, 'occupied');
-  }
-
-  right(board: GameBoard): void {
-    board.handleChange(this.x, this.y, '');
-    this.y++;
-    board.handleChange(this.x, this.y, 'occupied');
-  }
-}
-
-const block = new OneBlock(0, 5);
-
-(function loop() {
-  block.drop(game);
-
-  setTimeout(loop, 500);
-})();
+function gameLoop() {
+  game.run();
+  setTimeout(gameLoop, 500);
+};
+setTimeout(gameLoop, 1000);
 
 document.onkeydown = function(e: KeyboardEvent) {
 
-
     if (e.keyCode == 38) {
-        console.log('up');
-
+        // Up
     }
     else if (e.keyCode == 40) {
-        console.log('down');
+        game.emit(KeyboardSignal.DROP);
     }
     else if (e.keyCode == 37) {
-       console.log('left');
-       block.left(game);
+       game.emit(KeyboardSignal.LEFT);
 
     }
     else if (e.keyCode == 39) {
-       console.log('right');
-       block.right(game);
+       game.emit(KeyboardSignal.RIGHT);
+    }
+    else if (e.keyCode == 32) {
+       game.emit(KeyboardSignal.HARDDROP);
     }
 
 }
-
-
-
-/* Draws the game state
-const draw = (game) => {
-  let element = document.getElementById('game');
-  let gameView = '';
-  game.forEach((line) => {
-    line.forEach((block) => {
-      if(block === EMPTY) {
-        gameView += ' ';
-      } else {
-        gameView += block;
-      }
-    });
-    gameView += "\n";
-  });
-  element.innerHTML = gameView;
-}
-
-const initGame = () => {
-  return R.repeat(R.repeat(EMPTY, WIDTH), HEIGHT);
-}
-
-const newObject = () => {
-  return {
-    coords: [[0, 15], [0, 16], [0, 17], [0, 18]],
-    character: '*',
-    freeze: (game) => {
-
-    },
-    switch: () => {
-      if(R.uniq(R.map(R.nth(0), this.coords)).length === 1) {
-        let pivot = R.nth(1, R.nth(1, this.coords));
-        let row  = R.nth(0, R.nth(0, this.coords));
-        this.coords = [
-          [row-1, pivot],
-          [row, pivot],
-          [row+1, pivot],
-          [row+2, pivot]
-        ];
-      } else {
-        let pivot = R.nth(1, R.nth(1, this.coords));
-        let row  = R.nth(0, R.nth(1, this.coords));
-        this.coords = [
-          [row, pivot-1],
-          [row, pivot],
-          [row, pivot+1],
-          [row, pivot+2]
-        ];
-      }
-
-    }
-  }
-}
-
-let control = newObject();
-
-let game = null;
-
-const move = (game) => {
-  return mapIndexed((row, rowNbr) => {
-    return mapIndexed((block, blockNbr) => {
-      if(R.contains([rowNbr, blockNbr], control.coords)) {
-        return control.character;
-      }
-      return EMPTY;
-    }, row);
-  }, game);
-}
-
-const drop = () => {
-  control = R.evolve({coords: R.map((coords) => { return [R.inc(R.nth(0, coords)), R.nth(1, coords)]})}, control);
-}
-
-
-const loop = () => {
-  drop();
-  game = move(game);
-  draw(game);
-  setTimeout(() => {
-    loop();
-  }, 500);
-}
-
-game = initGame();
-loop();
-
-document.onkeydown = (ev) => {
-
-    let e = ev || window.event;
-
-    if (e.keyCode == '38') {
-        console.log('up');
-        control.switch();
-    }
-    else if (e.keyCode == '40') {
-        console.log('down');
-    }
-    else if (e.keyCode == '37') {
-       console.log('left');
-       control = R.evolve({coords: R.map((coords) => { return [R.nth(0, coords), R.dec(R.nth(1, coords))]})}, control);
-       game = move(game);
-       draw(game);
-    }
-    else if (e.keyCode == '39') {
-       console.log('right');
-       control = R.evolve({coords: R.map((coords) => { return [R.nth(0, coords), R.inc(R.nth(1, coords))]})}, control);
-       game = move(game);
-       draw(game);
-    }
-
-}*/
