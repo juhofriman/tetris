@@ -1,4 +1,4 @@
-import { Block, getBlock} from './blocks';
+import { Block, blockFactory} from './blocks/index';
 import { Point } from './Point';
 import {Color, Palette} from './palette'
 
@@ -131,7 +131,7 @@ export class GameBoard {
   }
 
   signalFreeze(): void {
-    this.control = getBlock();
+    this.control = blockFactory();
     this.control.init(this);
   }
 
