@@ -1,6 +1,6 @@
 import { Color, Palette } from '../palette';
 import { Point } from '../Point';
-import { GameBoard } from '../main';
+import { GameBoard } from '../GameBoard';
 import { Block } from './Block';
 
 /**

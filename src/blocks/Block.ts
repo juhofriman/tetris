@@ -1,4 +1,4 @@
-import { GameBoard} from '../main';
+import { GameBoard} from '../GameBoard';
 
 export interface Block {
   init(board: GameBoard): void;
