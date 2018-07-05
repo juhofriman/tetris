@@ -1,4 +1,4 @@
-import {Block, getBlock} from './blocks';
+import {Point, Block, getBlock} from './blocks';
 import {Color, Palette} from './palette'
 
 const WIDTH = 15;
@@ -12,7 +12,8 @@ enum KeyboardSignal {
     RIGHT,
     FLIP,
     DROP,
-    HARDDROP
+    HARDDROP,
+    NEWBLOCK
 }
 
 enum BlockStatus {
@@ -20,22 +21,26 @@ enum BlockStatus {
   FREE  = 'free'
 }
 
+class BufferCmd {
+  from: Point;
+  to: Point;
+  color: Color;
+}
+
 class BoardNode {
 
-  x: number;
-  y: number;
+  point: Point;
   domNode: HTMLElement;
 
-  constructor(domNode: HTMLElement, x: number, y: number) {
-    this.x = x;
-    this.y = y;
+  constructor(domNode: HTMLElement, point: Point) {
+    this.point = point;
     this.domNode = domNode;
     this.domNode.id = this.identifier();
     this.domNode.style.backgroundColor = Palette.freeColor.hex;
   }
 
   identifier(): string {
-    return this.x + '-' + this.y;
+    return this.point.identifier();
   }
 
   setStatus(status: BlockStatus, color: Color): void {
@@ -54,6 +59,8 @@ export class GameBoard {
 
   board: BoardNode[][] = new Array<BoardNode[]>();
 
+  currentMoveBuffer: Array<BufferCmd> = new Array<BufferCmd>();
+
   /**
    * Constructs game board and hooks it to the DOM
    */
@@ -70,7 +77,7 @@ export class GameBoard {
         var block = this.board[i][c];
         var node = document.createElement('td');
 
-        this.board[i][c] = new BoardNode(node, i, c);
+        this.board[i][c] = new BoardNode(node, new Point(i, c));
 
         rowElement.appendChild(node);
       }
@@ -81,22 +88,45 @@ export class GameBoard {
     this.signalFreeze();
   }
 
-  setOccupied(x: number, y: number, color: Color): void {
-    this.board[x][y].setStatus(BlockStatus.OCCUPIED, color);
+  setOccupied(point: Point, color: Color): void {
+    if(point.x < 0) {
+      return;
+    }
+    this.board[point.x][point.y].setStatus(BlockStatus.OCCUPIED, color);
   }
 
-  setFree(x: number, y: number): void {
-    this.board[x][y].setStatus(BlockStatus.FREE, Palette.freeColor);
+  setFree(point: Point): void {
+    if(point.x < 0) {
+      return;
+    }
+    this.board[point.x][point.y].setStatus(BlockStatus.FREE, Palette.freeColor);
   }
 
-  isFree(x: number, y: number): boolean {
-    if(y < 0 || y >= WIDTH) {
+
+
+  registerMove(from: Point, to: Point, color: Color): Point {
+    this.currentMoveBuffer.push({from: from, to: to, color: color})
+    return to;
+  }
+
+  move(): void {
+    for(let a of this.currentMoveBuffer) {
+      this.setFree(a.from);
+    }
+    for(let a of this.currentMoveBuffer) {
+      this.setOccupied(a.to, a.color);
+    }
+    this.currentMoveBuffer = new Array<BufferCmd>();
+  }
+
+  isFree(point: Point): boolean {
+    if(point.y < 0 || point.y >= WIDTH) {
       return false;
     }
-    if(x >= HEIGHT) {
+    if(point.x >= HEIGHT) {
       return false;
     }
-    return this.board[x][y].status() !== 'occupied';
+    return this.board[point.x][point.y].status() !== 'occupied';
   }
 
   signalFreeze(): void {
@@ -114,6 +144,8 @@ export class GameBoard {
       case KeyboardSignal.RIGHT: this.control.right(this); break;
       case KeyboardSignal.HARDDROP: this.control.hardDrop(this); break;
       case KeyboardSignal.DROP: this.control.drop(this); break;
+      case KeyboardSignal.FLIP: this.control.flip(this); break;
+      case KeyboardSignal.NEWBLOCK: this.signalFreeze(); break;
     }
   }
 }
@@ -123,13 +155,14 @@ const game = new GameBoard('game');
 function gameLoop() {
   game.run();
   setTimeout(gameLoop, 500);
+
 };
 setTimeout(gameLoop, 1000);
 
 document.onkeydown = function(e: KeyboardEvent) {
 
     if (e.keyCode == 38) {
-        // Up
+        game.emit(KeyboardSignal.FLIP);
     }
     else if (e.keyCode == 40) {
         game.emit(KeyboardSignal.DROP);
@@ -143,6 +176,9 @@ document.onkeydown = function(e: KeyboardEvent) {
     }
     else if (e.keyCode == 32) {
        game.emit(KeyboardSignal.HARDDROP);
+    }
+    else if (e.keyCode == 78) {
+      game.emit(KeyboardSignal.NEWBLOCK);
     }
 
 }
