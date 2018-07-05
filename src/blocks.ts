@@ -1,42 +1,20 @@
-import {GameBoard} from './main';
-import {Color, Palette} from './palette';
+import { GameBoard } from './main';
+import { Color, Palette } from './palette';
+import { Point } from './Point';
 
 // Sort of a block factory
 export function getBlock(): Block {
-
-  const x = Math.random();
-  if(x < 0.3) {
-      return new LineBlock();
-  }
-  if(x > 0.9) {
-      return new SBlock();
-  }
-  return new BoxBlock(0, 2);
+  return new SBlock();
+  // const x = Math.random();
+  // if(x < 0.3) {
+  //     return new LineBlock();
+  // }
+  // if(x > 0.9) {
+  //     return new SBlock();
+  // }
+  // return new BoxBlock(0, 2);
 }
 
-export class Point {
-  x: number;
-  y: number;
-  constructor(x: number, y:number) {
-    this.x =x;
-    this.y = y;
-  }
-  identifier(): string {
-    return this.x + '-' + this.y;
-  }
-  down(): Point {
-    return new Point(this.x + 1, this.y);
-  }
-  up(): Point {
-    return new Point(this.x - 1, this.y);
-  }
-  left(): Point {
-    return new Point(this.x, this.y - 1);
-  }
-  right(): Point {
-    return new Point(this.x, this.y + 1);
-  }
-}
 
 export interface Block {
   init(board: GameBoard): void;
@@ -47,6 +25,9 @@ export interface Block {
   right(board: GameBoard): void;
 }
 
+/**
+ * AbstractBlock
+ */
 abstract class AbstractBlock implements Block {
   blocks: Array<Point>;
   color: Color = Palette.random();
@@ -244,7 +225,7 @@ class FlipState {
   }
 }
 
-class FlipStateBlock extends AbstractBlock {
+abstract class FlipStateBlock extends AbstractBlock {
 
   statePointer = 0;
   states: Array<FlipState>;
@@ -268,7 +249,7 @@ class FlipStateBlock extends AbstractBlock {
   }
 }
 
-class NonFlipableBlock extends AbstractBlock {
+abstract class NonFlipableBlock extends AbstractBlock {
   constructor(generator: (startingPoint : Point) => Array<Point>) {
     super(generator(new Point(0, 0)));
   }

@@ -1,4 +1,5 @@
-import {Point, Block, getBlock} from './blocks';
+import { Block, getBlock} from './blocks';
+import { Point } from './Point';
 import {Color, Palette} from './palette'
 
 const WIDTH = 15;
