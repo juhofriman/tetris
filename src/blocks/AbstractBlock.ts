@@ -7,22 +7,50 @@ import { Block } from './Block';
  * AbstractBlock
  */
 export abstract class AbstractBlock implements Block {
+
+  /** Points in this block */
   blocks: Array<Point>;
+  /** Color for this block */
   color: Color;
+
   constructor(color: Color, blocks: Array<Point>) {
     this.color = color;
     this.blocks = blocks;
   }
+
+  /**
+   * Should return an array of required free points
+   * for flip
+   */
   abstract requireFreeForFlip(): Array<Point>;
+
+  /**
+   * Should return an array of points after flip
+   */
   abstract giveFlipGroup(): Array<Point>;
+
+  /**
+   * Hook for signaling succesfull flip
+   */
   abstract signalFlipSuccess(): void;
+
+  /**
+   * Hooks block to gameboard
+   */
+  init(board: GameBoard): void {
+    for(let point of this.blocks) {
+      board.setOccupied(point, this.color);
+    }
+  }
+
+  /**
+   * Executes flip for block
+   */
   flip(board: GameBoard): void {
     const requireFree = this.requireFreeForFlip();
 
     for(let point of requireFree) {
       if(!board.isFree(point)) {
-        console.log('Not free from require');
-        console.log(point);
         return;
       }
     }
@@ -30,8 +58,6 @@ export abstract class AbstractBlock implements Block {
 
     for(let point of flipGroup) {
       if(this.blocks.indexOf(point) == -1 && !board.isFree(point)) {
-        console.log("Not free for flip group");
-        console.log(point);
         return;
       }
     }
@@ -43,15 +69,65 @@ export abstract class AbstractBlock implements Block {
     board.move();
     this.signalFlipSuccess();
   }
-  uniqueArray(source: Array<number>): Array<number> {
-    const result: number[] = [];
 
+  /**
+   * Executes drop for block
+   */
+  drop(board: GameBoard): void {
+    if(this.canDrop(board)) {
+      this.blocks = this.blocks.map((point) => {
+        return board.registerMove(point, point.down(), this.color);
+      });
+      board.move();
+    } else {
+      board.signalFreeze();
+    }
+  }
+
+  /**
+   * Executes hard drop for block
+   */
+  hardDrop(board: GameBoard): void {}
+
+  /**
+   * Executes left move for block
+   */
+  left(board: GameBoard): void {
+    if(this.canMoveLeft(board)){
+      this.blocks = this.blocks.map((point) => {
+        return board.registerMove(point, point.left(), this.color);
+      });
+      board.move();
+    }
+  }
+
+  /**
+   * Executes right move for block
+   */
+  right(board: GameBoard): void {
+    if(this.canMoveRight(board)) {
+      this.blocks = this.blocks.map((point) => {
+        return board.registerMove(point, point.right(), this.color);
+      });
+      board.move();
+    }
+  }
+
+  /**
+   * Utility method for returning array with unique elements
+   */
+  private uniqueArray(source: Array<number>): Array<number> {
+    const result: number[] = [];
     for (let index = 0; index < source.length; index++) {
       let el = source[index];
       if (result.indexOf(el) == -1) result.push(el);
     }
     return result;
   }
+
+  /**
+   * Returns an array of the leftmost points in this block
+   */
   leftmost(): Array<Point> {
     const rows = this.uniqueArray(this.blocks.map((point) => point.x));
     const leftmosts = new Array<Point>();
@@ -70,6 +146,10 @@ export abstract class AbstractBlock implements Block {
     });
     return leftmosts;
   }
+
+  /**
+   * Returns an array of the rightmost points in this block
+   */
   rightmost(): Array<Point> {
     const rows = this.uniqueArray(this.blocks.map((point) => point.x));
     const leftmosts = new Array<Point>();
@@ -88,6 +168,10 @@ export abstract class AbstractBlock implements Block {
     });
     return leftmosts;
   }
+
+  /**
+   * Returns an array of the downmost points in this block
+   */
   downmost(): Array<Point> {
     const rows = this.uniqueArray(this.blocks.map((point) => point.y));
     const leftmosts = new Array<Point>();
@@ -106,38 +190,10 @@ export abstract class AbstractBlock implements Block {
     });
     return leftmosts;
   }
-  init(board: GameBoard): void {
-    for(let point of this.blocks) {
-      board.setOccupied(point, this.color);
-    }
-  }
-  drop(board: GameBoard): void {
-    if(this.canDrop(board)) {
-      this.blocks = this.blocks.map((point) => {
-        return board.registerMove(point, point.down(), this.color);
-      });
-      board.move();
-    } else {
-      board.signalFreeze();
-    }
-  }
-  hardDrop(board: GameBoard): void {}
-  left(board: GameBoard): void {
-    if(this.canMoveLeft(board)){
-      this.blocks = this.blocks.map((point) => {
-        return board.registerMove(point, point.left(), this.color);
-      });
-      board.move();
-    }
-  }
-  right(board: GameBoard): void {
-    if(this.canMoveRight(board)) {
-      this.blocks = this.blocks.map((point) => {
-        return board.registerMove(point, point.right(), this.color);
-      });
-      board.move();
-    }
-  }
+
+  /**
+   * Can this block drop?
+   */
   canDrop(board: GameBoard): boolean {
     for(let point of this.downmost()) {
       if(!board.isFree(point.down())) {
@@ -146,6 +202,10 @@ export abstract class AbstractBlock implements Block {
     }
     return true;
   }
+
+  /**
+   * Can this block move left?
+   */
   canMoveLeft(board: GameBoard): boolean {
     for(let point of this.leftmost()) {
       if(!board.isFree(point.left())) {
@@ -154,6 +214,10 @@ export abstract class AbstractBlock implements Block {
     }
     return true;
   }
+
+  /**
+   * Can this block move right?
+   */
   canMoveRight(board: GameBoard): boolean {
     for(let point of this.rightmost()) {
       if(!board.isFree(point.right())) {
