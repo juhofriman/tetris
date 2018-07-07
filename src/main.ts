@@ -1,7 +1,7 @@
 import { GameBoard} from './GameBoard';
 import { KeyboardSignal } from './KeyboardSignal';
 
-const game = new GameBoard('game');
+const game = new GameBoard('game', 10, 20);
 
 function gameLoop() {
   game.run();

@@ -5,18 +5,16 @@ import { Point } from './Point';
 import { Palette, Color } from './palette';
 import { KeyboardSignal } from './KeyboardSignal';
 
-const WIDTH = 15;
-const HEIGHT = 20;
-
-
 class BufferCmd {
   from: Point;
   to: Point;
   color: Color;
 }
 
-
 export class GameBoard {
+
+  WIDTH = 15;
+  HEIGHT = 20;
 
   control: Block;
 
@@ -27,16 +25,17 @@ export class GameBoard {
   /**
    * Constructs game board and hooks it to the DOM
    */
-  constructor(containerId: string) {
-
+  constructor(containerId: string, width: number, height: number) {
+    this.HEIGHT = height;
+    this.WIDTH = width;
     const container = document.getElementById(containerId);
     const table = document.createElement('table');
 
-    for(var i:number = 0; i < HEIGHT; i++) {
+    for(var i:number = 0; i < this.HEIGHT; i++) {
 
       var rowElement = document.createElement('tr');
       this.board[i] = new Array<BoardNode>();
-      for(var c:number = 0; c < WIDTH; c++) {
+      for(var c:number = 0; c < this.WIDTH; c++) {
         var block = this.board[i][c];
         var node = document.createElement('td');
 
@@ -65,8 +64,6 @@ export class GameBoard {
     this.board[point.x][point.y].setStatus(BlockStatus.FREE, Palette.freeColor);
   }
 
-
-
   registerMove(from: Point, to: Point, color: Color): Point {
     this.currentMoveBuffer.push({from: from, to: to, color: color})
     return to;
@@ -83,17 +80,17 @@ export class GameBoard {
   }
 
   isFree(point: Point): boolean {
-    if(point.y < 0 || point.y >= WIDTH) {
+    if(point.y < 0 || point.y >= this.WIDTH) {
       return false;
     }
-    if(point.x >= HEIGHT) {
+    if(point.x >= this.HEIGHT) {
       return false;
     }
     return this.board[point.x][point.y].status() !== BlockStatus.OCCUPIED;
   }
 
   signalFreeze(): void {
-    this.control = blockFactory();
+    this.control = blockFactory(this.WIDTH);
     this.control.init(this);
   }
 

@@ -4,6 +4,11 @@ import { Point } from '../Point';
 
 export { Block } from './Block';
 
-export function blockFactory() {
-  return new concrete.LineBlock(Palette.random(), new Point(0, 0));
+function getRandomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+export function blockFactory(width: number) {
+  // Implementation assumes that blocks are at most 4 points wide
+  return new concrete.LineBlock(Palette.random(), new Point(0, getRandomInt(0, width - 4)));
 }
