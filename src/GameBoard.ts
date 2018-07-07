@@ -13,13 +13,15 @@ class BufferCmd {
 
 export class GameBoard {
 
-  WIDTH = 15;
-  HEIGHT = 20;
-
+  /** Width of the board */
+  WIDTH: number;
+  /** Height of the board */
+  HEIGHT : number;
+  /** Currently controlled block instance */
   control: Block;
-
+  /** Board nodes */
   board: BoardNode[][] = new Array<BoardNode[]>();
-
+  /** Move buffer - regitesters all moving points */
   currentMoveBuffer: Array<BufferCmd> = new Array<BufferCmd>();
 
   /**
@@ -50,6 +52,9 @@ export class GameBoard {
     this.signalFreeze();
   }
 
+  /**
+   * Sets point occupied in board with given color
+   */
   setOccupied(point: Point, color: Color): void {
     if(point.x < 0) {
       return;
@@ -57,6 +62,9 @@ export class GameBoard {
     this.board[point.x][point.y].setStatus(BlockStatus.OCCUPIED, color);
   }
 
+  /**
+   * Sets point free in board
+   */
   setFree(point: Point): void {
     if(point.x < 0) {
       return;
@@ -64,11 +72,17 @@ export class GameBoard {
     this.board[point.x][point.y].setStatus(BlockStatus.FREE, Palette.freeColor);
   }
 
+  /**
+   * Registers move for point to be executed with move()
+   */
   registerMove(from: Point, to: Point, color: Color): Point {
     this.currentMoveBuffer.push({from: from, to: to, color: color})
     return to;
   }
 
+  /**
+   * Executes and flushes move buffer
+   */
   move(): void {
     for(let a of this.currentMoveBuffer) {
       this.setFree(a.from);
@@ -79,6 +93,9 @@ export class GameBoard {
     this.currentMoveBuffer = new Array<BufferCmd>();
   }
 
+  /**
+   * Checks if point is free in board
+   */
   isFree(point: Point): boolean {
     if(point.y < 0 || point.y >= this.WIDTH) {
       return false;
@@ -89,15 +106,24 @@ export class GameBoard {
     return this.board[point.x][point.y].status() !== BlockStatus.OCCUPIED;
   }
 
+  /**
+   * Signals freeze for currently controlled block and inits new block
+   */
   signalFreeze(): void {
     this.control = blockFactory(this.WIDTH);
     this.control.init(this);
   }
 
+  /**
+   * Runs a single iteration
+   */
   run(): void {
     this.control.drop(this);
   }
 
+  /**
+   * Emits command for currently controlled block
+   */
   emit(signal: KeyboardSignal): void {
     switch(signal) {
       case KeyboardSignal.LEFT: this.control.left(this); break;
