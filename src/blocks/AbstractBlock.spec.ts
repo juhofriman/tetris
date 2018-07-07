@@ -1,6 +1,7 @@
 import { AbstractBlock } from './AbstractBlock';
 import { Point } from '../Point';
 import { Color } from '../palette';
+import { GameBoard } from '../GameBoard';
 
 class TestBlock extends AbstractBlock {
   constructor(blocks: Array<Point>) {
@@ -17,7 +18,7 @@ class TestBlock extends AbstractBlock {
   }
 }
 
-describe('AbstractBlock.ts', () => {
+describe('AbstractBlock.ts search methods', () => {
   it('Should give the rightmost blocks', () => {
     expect(new TestBlock([new Point(1, 1)]).rightmost())
       .toEqual([new Point(1, 1)]);
@@ -46,5 +47,89 @@ describe('AbstractBlock.ts', () => {
     const downMostMultiple = new TestBlock([new Point(1, 1), new Point(2, 1), new Point(2, 1)]).downmost();
     expect(downMostMultiple.length).toEqual(1);
     expect(downMostMultiple).toContainEqual(new Point(2, 1));
+  });
+
+  it('xxx', () => {
+    const Mock = jest.fn<GameBoard>(() => ({
+      setOccupied: jest.fn(),
+    }));
+    const mock = new Mock();
+
+    new TestBlock([new Point(1, 1)]).init(mock);
+    expect(mock.setOccupied).toHaveBeenCalled();
+  });
+});
+
+describe('AbstractBlock.ts GameBoard interactions', () => {
+
+  const GameBoardMock = jest.fn<GameBoard>(() => ({
+    setOccupied: jest.fn(),
+    registerMove: (from: Point, to: Point, color: Color) => {
+      return to;
+    },
+    isFree: (point: Point) => true,
+    move: () => {},
+    signalFreeze: jest.fn()
+  }));
+
+  let gameboardMock: GameBoard;
+
+  beforeEach(() => {
+    gameboardMock = new GameBoardMock();
+  });
+
+  it('Calls setOccupied() for gameboard when block is hooked to the gameboard', () => {
+    new TestBlock([new Point(1, 1)]).init(gameboardMock);
+    expect(gameboardMock.setOccupied).toHaveBeenCalledTimes(1);
+  });
+
+  it('Calls setOccupied() for every point in block', () => {
+    new TestBlock([new Point(1, 1), new Point(1, 2), new Point(1, 3), new Point(1, 4)]).init(gameboardMock);
+    expect(gameboardMock.setOccupied).toHaveBeenCalledTimes(4);
+  });
+
+  it('drop() should drop points in block', () => {
+    const block = new TestBlock([new Point(1, 1)]);
+    block.init(gameboardMock);
+    block.drop(gameboardMock);
+    expect(block.blocks[0]).toEqual(new Point(1, 1).down());
+  });
+
+  it('drop() should signalFreeze if point is not free', () => {
+    const block = new TestBlock([new Point(1, 1)]);
+    gameboardMock.isFree = () => false;
+    block.init(gameboardMock);
+    block.drop(gameboardMock);
+    expect(gameboardMock.signalFreeze).toHaveBeenCalled();
+  });
+
+  it('left() should move points left', () => {
+    const block = new TestBlock([new Point(1, 1)]);
+    block.init(gameboardMock);
+    block.left(gameboardMock);
+    expect(block.blocks[0]).toEqual(new Point(1, 1).left());
+  });
+
+  it('left() should not move if point is not free', () => {
+    const block = new TestBlock([new Point(1, 1)]);
+    gameboardMock.isFree = () => false;
+    block.init(gameboardMock);
+    block.left(gameboardMock);
+    expect(block.blocks[0]).toEqual(new Point(1, 1));
+  });
+
+  it('right() should move points left', () => {
+    const block = new TestBlock([new Point(1, 1)]);
+    block.init(gameboardMock);
+    block.right(gameboardMock);
+    expect(block.blocks[0]).toEqual(new Point(1, 1).right());
+  });
+
+  it('right() should not move if point is not free', () => {
+    const block = new TestBlock([new Point(1, 1)]);
+    gameboardMock.isFree = () => false;
+    block.init(gameboardMock);
+    block.right(gameboardMock);
+    expect(block.blocks[0]).toEqual(new Point(1, 1));
   });
 });
