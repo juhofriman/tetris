@@ -103,6 +103,21 @@ describe('AbstractBlock.ts GameBoard interactions', () => {
     expect(gameboardMock.signalFreeze).toHaveBeenCalled();
   });
 
+  it('hardDrop() should drop points until canDrop()', () => {
+    const block = new TestBlock([new Point(1, 1)]);
+    // Return canMove false after three calls
+    let callCount = 0;
+    gameboardMock.isFree = () => {
+      callCount++;
+      return callCount != 4;
+    };
+    block.init(gameboardMock);
+    block.hardDrop(gameboardMock);
+    expect(block.blocks[0]).toEqual(new Point(1, 1).down().down().down());
+    expect(gameboardMock.signalFreeze).toHaveBeenCalled();
+  });
+
+
   it('left() should move points left', () => {
     const block = new TestBlock([new Point(1, 1)]);
     block.init(gameboardMock);

@@ -87,7 +87,15 @@ export abstract class AbstractBlock implements Block {
   /**
    * Executes hard drop for block
    */
-  hardDrop(board: GameBoard): void {}
+  hardDrop(board: GameBoard): void {
+    while(this.canDrop(board)) {
+      this.blocks = this.blocks.map((point) => {
+        return board.registerMove(point, point.down(), this.color);
+      });
+      board.move();
+    }
+    board.signalFreeze();
+  }
 
   /**
    * Executes left move for block
