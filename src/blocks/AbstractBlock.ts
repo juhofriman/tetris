@@ -94,7 +94,6 @@ export abstract class AbstractBlock implements Block {
       });
       board.move();
     }
-    board.signalFreeze();
   }
 
   /**

@@ -1,4 +1,5 @@
 import { Block, blockFactory } from './blocks/index';
+import { SuperBlock } from './blocks/concrete/SuperBlock';
 import { BoardNode } from './BoardNode';
 import { BlockStatus } from './BlockStatus';
 import { Point } from './Point';
@@ -106,10 +107,46 @@ export class GameBoard {
     return this.board[point.x][point.y].status() !== BlockStatus.OCCUPIED;
   }
 
+  private isAllOccupiedInRow(rowIndex: number): boolean {
+    for(let row of this.board[rowIndex]) {
+      if(row.status() !== BlockStatus.OCCUPIED) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  checkOccupiedRows(): void {
+    let dropIndex = -1;
+    for(let rowIndex = 0; rowIndex < this.board.length; rowIndex++) {
+      if(this.isAllOccupiedInRow(rowIndex)) {
+        for(let row of this.board[rowIndex]) {
+          row.setStatus(BlockStatus.FREE, Palette.freeColor);
+        }
+        dropIndex = rowIndex;
+      }
+    }
+
+    if(dropIndex > -1) {
+      const points: Point[] = new Array<Point>();
+      for(let rowIndex = 0; rowIndex < dropIndex; rowIndex++) {
+        for(let block of this.board[rowIndex]) {
+          if(block.status() === BlockStatus.OCCUPIED) {
+            points.push(block.point);
+          }
+        }
+      }
+      const superBlock = new SuperBlock(Palette.random(), points);
+      superBlock.init(this);
+      superBlock.hardDrop(this);
+    }
+  }
+
   /**
    * Signals freeze for currently controlled block and inits new block
    */
   signalFreeze(): void {
+    this.checkOccupiedRows();
     this.control = blockFactory(this.WIDTH);
     this.control.init(this);
   }
