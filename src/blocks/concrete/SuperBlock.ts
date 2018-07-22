@@ -2,8 +2,11 @@ import { Point } from '../../Point';
 import { NonFlipableBlock } from '../NonFlipableBlock';
 import { Color } from '../../palette';
 
+/**
+ * Super block is for dropping all blocks in board.
+ */
 export class SuperBlock extends NonFlipableBlock {
-  constructor(color: Color, points: Point[]) {
-    super(color, points);
+  constructor(points: Point[]) {
+    super(points);
   }
 }

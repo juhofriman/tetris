@@ -5,23 +5,30 @@ export interface Color {
 export class Palette {
   static freeColor: Color = {hex: '#ddd'}
   static colors: Color[] = [
-    {hex: "#479030"},
-    {hex: "#1B5209"},
-    {hex: "#205211"},
-    {hex: "#7ACE60"},
-    {hex: "#89CE73"},
-    {hex: "#226765"},
-    {hex: "#063B39"},
-    {hex: "#0C3B39"},
-    {hex: "#459491"},
-    {hex: "#529491"},
-    {hex: "#8AA236"},
-    {hex: "#4A5D0A"},
-    {hex: "#4C5D13"},
-    {hex: "#CCE86C"},
-    {hex: "#D1E882"}]
+    {hex: "#D05B5B" },
+    {hex: "#EED7D7" },
+    {hex: "#DE9B9B" },
+    {hex: "#BA1D1D" },
+    {hex: "#AB0000" },
+
+{ hex: "#524A90" },
+{ hex: "#9998A5" },
+{ hex: "#76729A" },
+{ hex: "#2D2381" },
+{ hex: "#160A77" },
+
+{ hex: "#D0C15B" },
+{ hex: "#EEEBD7" },
+{ hex: "#DED69B" },
+{ hex: "#BAA71D" },
+{ hex: "#AB9600" }
+]
 
   static random(): Color {
-    return this.colors[Math.floor(Math.random() * this.colors.length)]
+    return this.colors[Math.floor(Math.random() * Palette.colors.length)]
+  }
+
+  static fromHex(hex: string): Color {
+    return { hex: hex };
   }
 }

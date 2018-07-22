@@ -10,8 +10,8 @@ function getRandomInt(min: number, max: number): number {
 
 // Implementation assumes that blocks are at most 4 points wide
 const blockFns = [
-  (width: number) => new concrete.LineBlock(Palette.random(), new Point(0, getRandomInt(0, width - 4))),
-  (width: number) => new concrete.BoxBlock(Palette.random(), new Point(0, getRandomInt(0, width - 4))),
+  (width: number) => new concrete.LineBlock(new Point(Palette.random(), 0, getRandomInt(0, width - 4))),
+  (width: number) => new concrete.BoxBlock(new Point(Palette.random(), 0, getRandomInt(0, width - 4))),
 ];
 
 export function blockFactory(width: number) {

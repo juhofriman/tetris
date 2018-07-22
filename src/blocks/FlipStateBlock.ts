@@ -8,8 +8,8 @@ export abstract class FlipStateBlock extends AbstractBlock {
   statePointer = 0;
   states: Array<FlipState>;
 
-  constructor(color: Color, points: Array<Point>, ...states: Array<FlipState>) {
-    super(color, points);
+  constructor(points: Array<Point>, ...states: Array<FlipState>) {
+    super(points);
     this.states = states;
   }
 

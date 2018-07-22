@@ -3,8 +3,8 @@ import { Point } from '../Point';
 import { Color } from '../palette';
 
 export abstract class NonFlipableBlock extends AbstractBlock {
-  constructor(color: Color, points: Array<Point>) {
-    super(color, points);
+  constructor(points: Array<Point>) {
+    super(points);
   }
   signalFlipSuccess(): void {
   }

@@ -10,11 +10,8 @@ export abstract class AbstractBlock implements Block {
 
   /** Points in this block */
   blocks: Array<Point>;
-  /** Color for this block */
-  color: Color;
 
-  constructor(color: Color, blocks: Array<Point>) {
-    this.color = color;
+  constructor(blocks: Array<Point>) {
     this.blocks = blocks;
   }
 
@@ -39,7 +36,7 @@ export abstract class AbstractBlock implements Block {
    */
   init(board: GameBoard): void {
     for(let point of this.blocks) {
-      board.setOccupied(point, this.color);
+      board.setOccupied(point);
     }
   }
 
@@ -63,7 +60,7 @@ export abstract class AbstractBlock implements Block {
     }
     var i = 0;
     for(let point of flipGroup) {
-      this.blocks[i] = board.registerMove(this.blocks[i], point, this.color);
+      this.blocks[i] = board.registerMove(this.blocks[i], point);
       i++;
     }
     board.move();
@@ -76,7 +73,7 @@ export abstract class AbstractBlock implements Block {
   drop(board: GameBoard): void {
     if(this.canDrop(board)) {
       this.blocks = this.blocks.map((point) => {
-        return board.registerMove(point, point.down(), this.color);
+        return board.registerMove(point, point.down());
       });
       board.move();
     } else {
@@ -89,8 +86,9 @@ export abstract class AbstractBlock implements Block {
    */
   hardDrop(board: GameBoard): void {
     while(this.canDrop(board)) {
+
       this.blocks = this.blocks.map((point) => {
-        return board.registerMove(point, point.down(), this.color);
+        return board.registerMove(point, point.down());
       });
       board.move();
     }
@@ -102,7 +100,7 @@ export abstract class AbstractBlock implements Block {
   left(board: GameBoard): void {
     if(this.canMoveLeft(board)){
       this.blocks = this.blocks.map((point) => {
-        return board.registerMove(point, point.left(), this.color);
+        return board.registerMove(point, point.left());
       });
       board.move();
     }
@@ -114,7 +112,7 @@ export abstract class AbstractBlock implements Block {
   right(board: GameBoard): void {
     if(this.canMoveRight(board)) {
       this.blocks = this.blocks.map((point) => {
-        return board.registerMove(point, point.right(), this.color);
+        return board.registerMove(point, point.right());
       });
       board.move();
     }

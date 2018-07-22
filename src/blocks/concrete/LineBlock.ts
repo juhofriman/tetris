@@ -4,8 +4,8 @@ import { Point } from '../../Point';
 import { Color } from '../../palette';
 
 export class LineBlock extends FlipStateBlock {
-  constructor(color: Color, startingPoint: Point) {
-    super(color,
+  constructor(startingPoint: Point) {
+    super(
       [startingPoint, startingPoint.right(), startingPoint.right().right(), startingPoint.right().right().right()],
       new FlipState(
         (points: Array<Point>) => {

@@ -9,7 +9,6 @@ import { KeyboardSignal } from './KeyboardSignal';
 class BufferCmd {
   from: Point;
   to: Point;
-  color: Color;
 }
 
 export class GameBoard {
@@ -48,7 +47,7 @@ export class GameBoard {
         var block = this.board[i][c];
         var node = document.createElement('td');
 
-        this.board[i][c] = new BoardNode(node, new Point(i, c));
+        this.board[i][c] = new BoardNode(node, new Point(Palette.freeColor, i, c));
 
         rowElement.appendChild(node);
       }
@@ -66,11 +65,11 @@ export class GameBoard {
   /**
    * Sets point occupied in board with given color
    */
-  setOccupied(point: Point, color: Color): void {
+  setOccupied(point: Point): void {
     if(point.x < 0) {
       return;
     }
-    this.board[point.x][point.y].setStatus(BlockStatus.OCCUPIED, color);
+    this.board[point.x][point.y].setOccupied(point);
   }
 
   /**
@@ -80,14 +79,14 @@ export class GameBoard {
     if(point.x < 0) {
       return;
     }
-    this.board[point.x][point.y].setStatus(BlockStatus.FREE, Palette.freeColor);
+    this.board[point.x][point.y].setFree();
   }
 
   /**
    * Registers move for point to be executed with move()
    */
-  registerMove(from: Point, to: Point, color: Color): Point {
-    this.currentMoveBuffer.push({from: from, to: to, color: color})
+  registerMove(from: Point, to: Point): Point {
+    this.currentMoveBuffer.push({from: from, to: to})
     return to;
   }
 
@@ -99,7 +98,7 @@ export class GameBoard {
       this.setFree(a.from);
     }
     for(let a of this.currentMoveBuffer) {
-      this.setOccupied(a.to, a.color);
+      this.setOccupied(a.to);
     }
     this.currentMoveBuffer = new Array<BufferCmd>();
   }
@@ -152,7 +151,7 @@ export class GameBoard {
         }
       }
       if(points.length > 0) {
-      const superBlock = new SuperBlock(Palette.random(), points);
+        const superBlock = new SuperBlock(points);
         superBlock.init(this);
         superBlock.hardDrop(this);
       }
