@@ -2,19 +2,17 @@ import { AbstractBlock } from './AbstractBlock';
 import { Point } from '../Point';
 import { Color, Palette } from '../palette';
 import { GameBoard } from '../GameBoard';
+import { MoveSet } from './MoveSet';
 
 class TestBlock extends AbstractBlock {
   constructor(blocks: Array<Point>) {
     super(blocks);
   }
-  requireFreeForFlip(): Array<Point> {
+  giveMoveSet(): MoveSet {
     return null;
   }
-  giveFlipGroup(): Array<Point> {
-    return null;
-  }
-  signalFlipSuccess(): void {
 
+  signalFlipSuccess(): void {
   }
 }
 

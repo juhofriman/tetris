@@ -2,6 +2,7 @@ import { Color, Palette } from '../palette';
 import { Point } from '../Point';
 import { GameBoard } from '../GameBoard';
 import { Block } from './Block';
+import { MoveSet } from './MoveSet';
 
 /**
  * AbstractBlock
@@ -16,15 +17,9 @@ export abstract class AbstractBlock implements Block {
   }
 
   /**
-   * Should return an array of required free points
-   * for flip
-   */
-  abstract requireFreeForFlip(): Array<Point>;
-
-  /**
    * Should return an array of points after flip
    */
-  abstract giveFlipGroup(): Array<Point>;
+  abstract giveMoveSet(): MoveSet
 
   /**
    * Hook for signaling succesfull flip
@@ -44,22 +39,25 @@ export abstract class AbstractBlock implements Block {
    * Executes flip for block
    */
   flip(board: GameBoard): void {
-    const requireFree = this.requireFreeForFlip();
+    const moveSet = this.giveMoveSet();
 
-    for(let point of requireFree) {
+    for(let point of moveSet.requireFree) {
       if(!board.isFree(point)) {
         return;
       }
     }
-    const flipGroup = this.giveFlipGroup();
 
-    for(let point of flipGroup) {
-      if(this.blocks.indexOf(point) == -1 && !board.isFree(point)) {
+    for(let point of moveSet.nextState) {
+      if(!this.blocks.some((p: Point) => p.equals(point)) && !board.isFree(point)) {
+        console.log(this.blocks);
+        console.log(point);
+        console.log(this.blocks.indexOf(point));
+        console.log(board.isFree(point));
         return;
       }
     }
     var i = 0;
-    for(let point of flipGroup) {
+    for(let point of moveSet.nextState) {
       this.blocks[i] = board.registerMove(this.blocks[i], point);
       i++;
     }

@@ -189,7 +189,7 @@ export class GameBoard {
    */
   run(): boolean {
     if(!this.done) {
-      this.control.drop(this);
+      //this.control.drop(this);
     }
     return this.done;
   }

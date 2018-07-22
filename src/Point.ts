@@ -31,4 +31,7 @@ export class Point {
   right(): Point {
     return new Point(this.color, this.x, this.y + 1);
   }
+  equals(p: Point): boolean {
+    return this.x === p.x && this.y === p.y;
+  }
 }

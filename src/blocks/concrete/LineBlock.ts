@@ -1,26 +1,27 @@
-import { FlipStateBlock } from '../FlipStateBlock';
-import { FlipState } from '../FlipState';
+import { PivotBlock } from '../PivotBlock';
+import { MoveSet } from '../MoveSet';
 import { Point } from '../../Point';
 import { Color } from '../../palette';
 
-export class LineBlock extends FlipStateBlock {
+export class LineBlock extends PivotBlock {
   constructor(startingPoint: Point) {
-    super(
-      [startingPoint, startingPoint.right(), startingPoint.right().right(), startingPoint.right().right().right()],
-      new FlipState(
-        (points: Array<Point>) => {
-          return [points[0].up(), points[2].down(), points[3].down()];
-        },
-        (points: Array<Point>) => {
-          return [points[1].up(), points[1], points[1].down(), points[1].down().down()]
-        }),
-      new FlipState(
-        (points: Array<Point>) => {
-          return [points[0].left(), points[2].right(), points[3].right()];
-        },
-        (points: Array<Point>) => {
-          return [points[1].left(), points[1], points[1].right(), points[1].right().right()]
-        })
-    );
+    super(startingPoint);
+  }
+
+  getStateFns(): ((point: Point) => MoveSet)[] {
+    return [
+      (pivot: Point): MoveSet => {
+        return new MoveSet(
+          [pivot, pivot.left(), pivot.right(), pivot.right().right()],
+          [pivot.up().left(), pivot.down().right(), pivot.down().right().right(), pivot.down().down().right()]
+        );
+      },
+      (pivot: Point): MoveSet => {
+        return new MoveSet(
+          [pivot, pivot.up(), pivot.down(), pivot.down().down()],
+          [pivot.left().up(), pivot.right().down(), pivot.right().right().down(), pivot.right().down().down()]
+        );
+      }
+    ]
   }
 }
