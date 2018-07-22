@@ -15,9 +15,11 @@ const blockFns = [
   (width: number) => new concrete.TBlock(new Point(Palette.random(), 0, getRandomInt(2, width - 4))),
   (width: number) => new concrete.LBlock(new Point(Palette.random(), 0, getRandomInt(2, width - 4))),
   (width: number) => new concrete.SBlock(new Point(Palette.random(), 0, getRandomInt(2, width - 4))),
+  (width: number) => new concrete.InvertedSBlock(new Point(Palette.random(), 0, getRandomInt(2, width - 4))),
+  (width: number) => new concrete.InvertedLBlock(new Point(Palette.random(), 0, getRandomInt(2, width - 4))),
 ];
 
 export function blockFactory(width: number) {
   return blockFns[getRandomInt(0, blockFns.length - 1)](width);
-  // return new concrete.SBlock(new Point(Palette.random(), 0, getRandomInt(2, width - 4)));
+  // return new concrete.InvertedLBlock(new Point(Palette.random(), 0, getRandomInt(2, width - 4)));
 }
