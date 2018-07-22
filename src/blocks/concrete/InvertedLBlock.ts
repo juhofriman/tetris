@@ -13,25 +13,25 @@ export class InvertedLBlock extends PivotBlock {
       (pivot: Point): MoveSet => {
         return new MoveSet(
           [pivot, pivot.left(), pivot.right(), pivot.right().up()],
-          [pivot.right()]
+          [pivot.left().down()]
         );
       },
       (pivot: Point): MoveSet => {
         return new MoveSet(
           [pivot, pivot.up(), pivot.down(), pivot.down().right()],
-          []
+          [pivot.left().up()]
         );
       },
       (pivot: Point): MoveSet => {
         return new MoveSet(
           [pivot, pivot.right(), pivot.left(), pivot.left().down()],
-          []
+          [pivot.right().up()]
         );
       },
       (pivot: Point): MoveSet => {
         return new MoveSet(
           [pivot, pivot.down(), pivot.up(), pivot.up().left()],
-          []
+          [pivot.right().down()]
         );
       },
     ]
