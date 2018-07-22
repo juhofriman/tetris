@@ -49,10 +49,6 @@ export abstract class AbstractBlock implements Block {
 
     for(let point of moveSet.nextState) {
       if(!this.blocks.some((p: Point) => p.equals(point)) && !board.isFree(point)) {
-        console.log(this.blocks);
-        console.log(point);
-        console.log(this.blocks.indexOf(point));
-        console.log(board.isFree(point));
         return;
       }
     }
