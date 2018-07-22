@@ -110,7 +110,7 @@ export class GameBoard {
     if(point.y < 0 || point.y >= this.WIDTH) {
       return false;
     }
-    if(point.x >= this.HEIGHT) {
+    if(point.x < 0 || point.x >= this.HEIGHT) {
       return false;
     }
     return this.board[point.x][point.y].status() !== BlockStatus.OCCUPIED;
