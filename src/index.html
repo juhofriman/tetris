@@ -1,19 +1,50 @@
 <!DOCTYPE html>
 <html lang="fi">
 <head>
-    <title>DOMTrix</title>
+    <title>Tetris testing bench</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <style>
+      .wrapper {
+        margin-left: 10em;
+        margin-right: 10em;
+      }
+      h1 {
+        font-family: monospace;
+        color: #999;
+      }
       td {
         width:15px;
         height:15px;
         background-color: #eac;
       }
+      .intro {
+        font-family: monospace;
+        color: #999;
+      }
     </style>
 </head>
 <body>
+  <div class="wrapper">
+    <h1>It's a tetris in Typescript</h1>
     <pre id="game"></pre>
+    <div class="intro">
+      <p>Should work as tetrises usually work. No canvas or anything like that - just plain old DOM.</p>
+
+      <ul>
+        <li>LEFT Obvious</li>
+        <li>RIGHT Obvious</li>
+        <li>DOWN Soft drop</li>
+        <li>UP Flip</li>
+        <li>SPACE Hard drop</li>
+      </ul>
+
+      <p>Sources available at <a href="https://github.com/juhofriman/tetris">https://github.com/juhofriman/tetris</a>.</p>
+
+      <p><strong>NOTE: </strong> This is just a temporary deployment and will be removed eventually :P</p>
+      <p><strong>YET ANOTHER NOTE: </strong> Trying to play with mobile device? Forget about it.</p>
+    </div>
+  </div>
 </body>
 </html>
