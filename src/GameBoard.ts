@@ -14,6 +14,8 @@ class BufferCmd {
 
 export class GameBoard {
 
+  /** DOM container */
+  container: HTMLElement;
   /** Width of the board */
   WIDTH: number;
   /** Height of the board */
@@ -26,6 +28,8 @@ export class GameBoard {
   currentMoveBuffer: Array<BufferCmd> = new Array<BufferCmd>();
   /** Points */
   points: number = 0;
+  /** done? */
+  done: boolean = false;
 
   /**
    * Constructs game board and hooks it to the DOM
@@ -33,7 +37,7 @@ export class GameBoard {
   constructor(containerId: string, width: number, height: number) {
     this.HEIGHT = height;
     this.WIDTH = width;
-    const container = document.getElementById(containerId);
+    this.container = document.getElementById(containerId);
     const table = document.createElement('table');
 
     for(var i:number = 0; i < this.HEIGHT; i++) {
@@ -53,9 +57,9 @@ export class GameBoard {
     const points = document.createElement('div');
     points.id = 'points';
     points.innerText = '' + this.points;
-    container.appendChild(points);
+    this.container.appendChild(points);
 
-    container.appendChild(table);
+    this.container.appendChild(table);
     this.signalFreeze();
   }
 
@@ -156,20 +160,37 @@ export class GameBoard {
     }
   }
 
+  checkGameEnd(): void {
+    for(let block of this.board[0]) {
+      if(block.status() === BlockStatus.OCCUPIED) {
+        this.control = null;
+        this.done = true;
+        const gameOver = document.createElement('div');
+        gameOver.innerText = 'Game over. Replay by reloading page.';
+        this.container.appendChild(gameOver);
+        break;
+      }
+    }
+  }
+
   /**
    * Signals freeze for currently controlled block and inits new block
    */
   signalFreeze(): void {
     this.checkOccupiedRows();
     this.control = blockFactory(this.WIDTH);
+    this.checkGameEnd();
     this.control.init(this);
   }
 
   /**
    * Runs a single iteration
    */
-  run(): void {
-    this.control.drop(this);
+  run(): boolean {
+    if(!this.done) {
+      this.control.drop(this);
+    }
+    return this.done;
   }
 
   /**
