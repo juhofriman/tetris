@@ -179,7 +179,9 @@ export class GameBoard {
     this.checkOccupiedRows();
     this.control = blockFactory(this.WIDTH);
     this.checkGameEnd();
-    this.control.init(this);
+    if(!this.done) {
+      this.control.init(this);
+    }
   }
 
   /**
