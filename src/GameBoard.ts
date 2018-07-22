@@ -136,9 +136,11 @@ export class GameBoard {
           }
         }
       }
+      if(points.length > 0) {
       const superBlock = new SuperBlock(Palette.random(), points);
-      superBlock.init(this);
-      superBlock.hardDrop(this);
+        superBlock.init(this);
+        superBlock.hardDrop(this);
+      }
     }
   }
 
