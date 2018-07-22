@@ -24,6 +24,8 @@ export class GameBoard {
   board: BoardNode[][] = new Array<BoardNode[]>();
   /** Move buffer - regitesters all moving points */
   currentMoveBuffer: Array<BufferCmd> = new Array<BufferCmd>();
+  /** Points */
+  points: number = 0;
 
   /**
    * Constructs game board and hooks it to the DOM
@@ -48,6 +50,10 @@ export class GameBoard {
       }
       table.appendChild(rowElement);
     }
+    const points = document.createElement('div');
+    points.id = 'points';
+    points.innerText = '' + this.points;
+    container.appendChild(points);
 
     container.appendChild(table);
     this.signalFreeze();
@@ -116,6 +122,11 @@ export class GameBoard {
     return true;
   }
 
+  givePoints(row: number): void {
+    this.points += 100 * (this.HEIGHT - row + 1);
+    document.getElementById('points').innerText = '' + this.points;
+  }
+
   checkOccupiedRows(): void {
     let dropIndex = -1;
     for(let rowIndex = 0; rowIndex < this.board.length; rowIndex++) {
@@ -141,6 +152,7 @@ export class GameBoard {
         superBlock.init(this);
         superBlock.hardDrop(this);
       }
+      this.givePoints(dropIndex);
     }
   }
 
